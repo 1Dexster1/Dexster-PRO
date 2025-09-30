@@ -36,8 +36,8 @@ fs.ensureDirSync(tempDir);
 
 // Create Express app
 const app = express();
-const port = 7008;
-const usedPorts = new Set([7008]);
+const port = 7019;
+const usedPorts = new Set([7019]);
 
 // Format console output function
 const formatConsoleOutput = (log) => {
