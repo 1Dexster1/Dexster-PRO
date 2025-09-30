@@ -34,10 +34,35 @@ const serverStartTime = {};
 // Ensure temp directory exists
 fs.ensureDirSync(tempDir);
 
+// Persistent per-server files root (all user server data lives here)
+const FILES_ROOT = path.join(__dirname, 'files');
+fs.ensureDirSync(FILES_ROOT);
+
+function getServerStoragePaths(userId, serverId) {
+    const baseDir = path.join(FILES_ROOT, String(userId), String(serverId));
+    const filesDir = path.join(baseDir, 'files'); // visible persistent files
+    const tmpDir = path.join(baseDir, 'tmp'); // transient, scoped to this server
+    fs.ensureDirSync(filesDir);
+    fs.ensureDirSync(tmpDir);
+    return { baseDir, filesDir, tmpDir };
+}
+
+// Helpers to work with per-server filesystem safely
+function getFilesDirFor(userId, serverId) {
+    const { filesDir } = getServerStoragePaths(userId, serverId);
+    return filesDir;
+}
+
+function resolveServerPath(filesDir, relativePath) {
+    const safeRel = (relativePath || '').replace(/\\/g, '/');
+    const normalized = path.normalize(safeRel).replace(/^([.][.][/\\])+/, '');
+    return path.join(filesDir, normalized);
+}
+
 // Create Express app
 const app = express();
-const port = 7019;
-const usedPorts = new Set([7019]);
+const port = 7008;
+const usedPorts = new Set([7008]);
 
 // Format console output function
 const formatConsoleOutput = (log) => {
@@ -49,19 +74,19 @@ const formatConsoleOutput = (log) => {
     const lowerLog = cleanLog.toLowerCase();
 
     if (lowerLog.includes('error') || lowerLog.includes('خطأ') || lowerLog.includes('err')) {
-        icon = `<i class='fas fa-times-circle text-red-500 mr-1'></i>`;
+        icon = `<i class='fas fa-circle-xmark text-purple-400 mr-2'></i>`;
         colorClass = 'console-log-error';
-    } else if (lowerLog.includes('warn') || lowerLog.includes('تحذير') || lowerLog.includes('warn')) {
-        icon = `<i class='fas fa-exclamation-triangle text-yellow-400 mr-1'></i>`;
+    } else if (lowerLog.includes('warn') || lowerLog.includes('تحذير')) {
+        icon = `<i class='fas fa-triangle-exclamation text-purple-400 mr-2'></i>`;
         colorClass = 'console-log-warn';
     } else if (lowerLog.includes('success') || lowerLog.includes('تم') || lowerLog.includes('completed') || lowerLog.includes('تثبيت الحزم')) {
-        icon = `<i class='fas fa-check-circle text-green-500 mr-1'></i>`;
+        icon = `<i class='fas fa-circle-check text-purple-400 mr-2'></i>`;
         colorClass = 'console-log-success';
     } else if (lowerLog.includes('info') || lowerLog.includes('معلومات')) {
-        icon = `<i class='fas fa-info-circle text-blue-400 mr-1'></i>`;
+        icon = `<i class='fas fa-circle-info text-purple-400 mr-2'></i>`;
         colorClass = 'console-log-info';
     } else {
-        icon = `<i class='fas fa-terminal text-slate-400 mr-1'></i>`;
+        icon = `<i class='fas fa-terminal text-purple-400 mr-2'></i>`;
         colorClass = 'console-log-info';
     }
     // إرجاع HTML منسق للعرض في الواجهة
@@ -328,7 +353,7 @@ const authTemplate = (content, title) => `
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚀 Dexster Pro - ${title}</title>
+    <title>Dexster Pro - ${title}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -339,33 +364,34 @@ const authTemplate = (content, title) => `
         }
         
         :root {
-            --primary: #3b82f6;
-            --primary-dark: #2563eb;
-            --secondary: #64748b;
-            --accent: #0ea5e9;
+            /* Monochrome base with purple accent */
+            --primary: #a78bfa;       /* purple-300 */
+            --primary-dark: #8b5cf6;  /* purple-500 */
+            --secondary: #9ca3af;     /* neutral gray for subtle elements */
+            --accent: #c4b5fd;        /* lighter purple */
             --success: #22c55e;
             --warning: #f59e0b;
             --danger: #ef4444;
-            --info: #06b6d4;
-            
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --bg-tertiary: #334155;
-            --bg-card: #1e293b;
-            --bg-hover: #334155;
-            
-            --text-primary: #f8fafc;
-            --text-secondary: #cbd5e1;
-            --text-muted: #94a3b8;
-            
-            --border: #334155;
-            --border-light: #475569;
-            
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --info: #8b5cf6;
+
+            --bg-primary: #0b0b10;    /* near black */
+            --bg-secondary: #111218;  /* dark gray */
+            --bg-tertiary: #1a1b22;   /* panel */
+            --bg-card: #111218;
+            --bg-hover: #1a1b22;
+
+            --text-primary: #ffffff;  /* white */
+            --text-secondary: #d1d5db;/* light gray */
+            --text-muted: #9ca3af;    /* muted gray */
+
+            --border: #242532;
+            --border-light: #2f3140;
+
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.2);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.35), 0 2px 4px -2px rgb(0 0 0 / 0.25);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.45), 0 8px 10px -6px rgb(0 0 0 / 0.35);
         }
         
         body { 
@@ -545,7 +571,7 @@ const baseTemplate = (content, activePage, user, showSidebar = true, serverId = 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚀 Dexster Pro - ${activePage}</title>
+    <title>Dexster Pro - ${activePage}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -559,33 +585,34 @@ const baseTemplate = (content, activePage, user, showSidebar = true, serverId = 
         }
         
         :root {
-            --primary: #3b82f6;
-            --primary-dark: #2563eb;
-            --secondary: #64748b;
-            --accent: #0ea5e9;
+            /* Monochrome base with purple accent */
+            --primary: #a78bfa;       /* purple-300 */
+            --primary-dark: #8b5cf6;  /* purple-500 */
+            --secondary: #9ca3af;     /* neutral gray for subtle elements */
+            --accent: #c4b5fd;        /* lighter purple */
             --success: #22c55e;
             --warning: #f59e0b;
             --danger: #ef4444;
-            --info: #06b6d4;
-            
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --bg-tertiary: #334155;
-            --bg-card: #1e293b;
-            --bg-hover: #334155;
-            
-            --text-primary: #f8fafc;
-            --text-secondary: #cbd5e1;
-            --text-muted: #94a3b8;
-            
-            --border: #334155;
-            --border-light: #475569;
-            
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --info: #8b5cf6;
+
+            --bg-primary: #0b0b10;    /* near black */
+            --bg-secondary: #111218;  /* dark gray */
+            --bg-tertiary: #1a1b22;   /* panel */
+            --bg-card: #111218;
+            --bg-hover: #1a1b22;
+
+            --text-primary: #ffffff;  /* white */
+            --text-secondary: #d1d5db;/* light gray */
+            --text-muted: #9ca3af;    /* muted gray */
+
+            --border: #242532;
+            --border-light: #2f3140;
+
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.2);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.35), 0 2px 4px -2px rgb(0 0 0 / 0.25);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.45), 0 8px 10px -6px rgb(0 0 0 / 0.35);
         }
         
         body { 
@@ -1309,11 +1336,11 @@ const baseTemplate = (content, activePage, user, showSidebar = true, serverId = 
 </head>
 <body class="flex flex-col min-h-screen">
     ${impersonatedUsername ? `
-        <div style="position: fixed; top: 0; left: 0; right: 0; z-index: 9999;" class="bg-gradient-to-r from-yellow-400 to-orange-500 text-black p-3 text-center shadow-lg">
+        <div style="position: fixed; top: 0; left: 0; right: 0; z-index: 9999;" class="bg-[var(--bg-tertiary)] text-white p-3 text-center shadow-lg border-b border-[var(--border)]">
             <div class="container mx-auto flex justify-between items-center">
-                <span class="font-semibold"><i class="fas fa-user-secret mr-2"></i>أنت الآن تحاكي حساب: <strong>${impersonatedUsername}</strong></span>
+                <span class="font-semibold"><i class="fas fa-user-secret mr-3 text-purple-400"></i>أنت الآن تحاكي حساب: <strong>${impersonatedUsername}</strong></span>
                 <form action="/stop-impersonating" method="POST" class="inline">
-                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white text-sm py-2 px-4 rounded-lg font-medium transition-all">إنهاء المحاكاة</button>
+                    <button type="submit" class="btn btn-danger">إنهاء المحاكاة</button>
                 </form>
             </div>
         </div>
@@ -1600,25 +1627,7 @@ app.get('/', ensureLoggedIn, async (req, res) => {
     }
 
     const initialContent = `
-        <!-- Hero Section -->
-        <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold mb-4 text-white">
-                <i class="fas fa-server mr-3 text-blue-400"></i>لوحة تحكم السيرفرات
-            </h1>
-            <p class="text-lg text-gray-400 mb-6">إدارة سيرفراتك بسهولة وأمان</p>
-            
-            <div class="flex justify-center gap-6 mb-6">
-                <div class="flex items-center gap-2 text-sm text-gray-400">
-                    <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span>نظام نشط</span>
-                </div>
-                <div class="flex items-center gap-2 text-sm text-gray-400">
-                    <i class="fas fa-shield-alt"></i>
-                    <span>أمان متقدم</span>
-                </div>
-            </div>
-        </div>
-
+       
 
         <!-- User Info & Controls -->
         <div class="card mb-8">
@@ -1643,31 +1652,13 @@ app.get('/', ensureLoggedIn, async (req, res) => {
             </div>
         </div>
 
-        <!-- Quick Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div class="card text-center">
-                <div class="text-2xl font-bold text-blue-400 mb-1" id="totalServers">-</div>
-                <div class="text-sm text-gray-400">إجمالي السيرفرات</div>
-            </div>
-            <div class="card text-center">
-                <div class="text-2xl font-bold text-green-400 mb-1" id="runningServers">-</div>
-                <div class="text-sm text-gray-400">السيرفرات النشطة</div>
-            </div>
-            <div class="card text-center">
-                <div class="text-2xl font-bold text-yellow-400 mb-1" id="uptime">-</div>
-                <div class="text-sm text-gray-400">وقت التشغيل</div>
-            </div>
-            <div class="card text-center">
-                <div class="text-2xl font-bold text-purple-400 mb-1" id="performance">-</div>
-                <div class="text-sm text-gray-400">الأداء</div>
-            </div>
-        </div>
+        
 
         <!-- Servers Section -->
         <div class="mb-8">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-2xl font-bold flex items-center gap-3">
-                    <i class="fas fa-server text-blue-400"></i>
+                    <i class="fas fa-server text-purple-400"></i>
                     سيرفراتك
                 </h2>
                 <div class="flex items-center gap-2">
@@ -1678,44 +1669,13 @@ app.get('/', ensureLoggedIn, async (req, res) => {
             
             <div id="serversListPlaceholder" class="text-center text-gray-400 py-12">
                 <div class="animate-pulse">
-                    <i class="fas fa-spinner fa-spin fa-3x mb-4 text-blue-400"></i>
+                    <i class="fas fa-spinner fa-spin fa-3x mb-4 text-purple-400"></i>
                     <p class="text-lg">جاري تحميل السيرفرات...</p>
                 </div>
             </div>
         </div>
 
-        <!-- Features Section -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="card hover:scale-105 transition-transform duration-300">
-                <div class="text-center">
-                    <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-terminal text-white text-2xl"></i>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-2">كونسول متقدم</h3>
-                    <p class="text-gray-400">تحكم كامل في سيرفراتك عبر كونسول احترافي مع إمكانيات Terminal متقدمة</p>
-                </div>
-            </div>
-            
-            <div class="card hover:scale-105 transition-transform duration-300">
-                <div class="text-center">
-                    <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-folder-open text-white text-2xl"></i>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-2">إدارة الملفات</h3>
-                    <p class="text-gray-400">نظام إدارة ملفات متطور مع دعم التحرير المباشر والرفع والتحميل</p>
-                </div>
-            </div>
-            
-            <div class="card hover:scale-105 transition-transform duration-300">
-                <div class="text-center">
-                    <div class="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fas fa-shield-alt text-white text-2xl"></i>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-2">أمان متقدم</h3>
-                    <p class="text-gray-400">حماية شاملة لسيرفراتك مع نظام صلاحيات متطور ومراقبة مستمرة</p>
-                </div>
-            </div>
-        </div>
+        
 
         <script>
             document.addEventListener('DOMContentLoaded', async () => {
@@ -1752,16 +1712,7 @@ app.get('/', ensureLoggedIn, async (req, res) => {
                             showAllServersTogglePlaceholder.innerHTML = ''; // Clear if not admin
                         }
 
-                        // Update statistics
-                        const totalServers = data.serversToShow.length;
-                        const runningServers = data.serversToShow.filter(s => s.isRunning).length;
-                        const uptime = runningServers > 0 ? '99.9%' : '0%';
-                        const performance = runningServers > 0 ? 'ممتاز' : 'غير متاح';
-                        
-                        document.getElementById('totalServers').textContent = totalServers;
-                        document.getElementById('runningServers').textContent = runningServers;
-                        document.getElementById('uptime').textContent = uptime;
-                        document.getElementById('performance').textContent = performance;
+        // No stats on minimal homepage
 
                         // Update servers list
                         if (data.serversToShow.length === 0) {
@@ -1784,7 +1735,7 @@ app.get('/', ensureLoggedIn, async (req, res) => {
                                         <div class="card hover:scale-105 transition-all duration-300 group">
                                             <div class="flex items-center justify-between mb-4">
                                                 <div class="flex items-center gap-3">
-                                                    <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
+                                                    <div class="w-10 h-10 bg-[var(--bg-tertiary)] border border-[var(--border)] rounded-lg flex items-center justify-center">
                                                         <i class="fas fa-server text-white"></i>
                                             </div>
                                                     <div>
@@ -1793,8 +1744,8 @@ app.get('/', ensureLoggedIn, async (req, res) => {
                                                     </div>
                                                 </div>
                                                 <div class="flex items-center gap-2">
-                                                    <div class="w-3 h-3 rounded-full \${server.isRunning ? 'bg-green-500 animate-pulse' : 'bg-red-500'}"></div>
-                                                    <span class="text-xs \${server.isRunning ? 'text-green-400' : 'text-red-400'}">\${server.isRunning ? 'نشط' : 'متوقف'}</span>
+                                                    <div class="w-3 h-3 rounded-full \${server.isRunning ? 'bg-white animate-pulse' : 'bg-purple-400'}"></div>
+                                                    <span class="text-xs text-gray-300">\${server.isRunning ? 'نشط' : 'متوقف'}</span>
                                                 </div>
                                             </div>
                                             
@@ -1811,7 +1762,7 @@ app.get('/', ensureLoggedIn, async (req, res) => {
                                             
                                             <div class="flex gap-2">
                                                 <a href="/server?serverId=\${server.id}\${data.showAllServersQuery ? \`&userId=\${server.ownerId}\` : ''}" 
-                                                   class="flex-1 btn btn-primary text-center group-hover:bg-blue-600 transition-colors">
+                                                   class="flex-1 btn btn-primary text-center">
                                                     <i class="fas fa-cog mr-2"></i>إدارة
                                                 </a>
                                                 <a href="/files?serverId=\${server.id}\${data.showAllServersQuery ? \`&userId=\${server.ownerId}\` : ''}" 
@@ -2131,7 +2082,7 @@ app.get('/server', ensureLoggedIn, ensureServerAccess, async (req, res) => {
                     </button>
             </form>
                 
-                <form action="/kill-server" method="POST" onsubmit="return confirm('⚠️ تحذير: هل أنت متأكد من إيقاف السيرفر قسراً؟\\n\\nقد يؤدي هذا لفقدان بيانات غير محفوظة!');" class="flex-1 min-w-32">
+                <form action="/kill-server" method="POST" onsubmit="return confirm('تحذير: هل أنت متأكد من إيقاف السيرفر قسراً؟\\n\\nقد يؤدي هذا لفقدان بيانات غير محفوظة!');" class="flex-1 min-w-32">
                 <input type="hidden" name="userId" value="${userId}">
                 <input type="hidden" name="serverId" value="${serverId}">
                     <button type="submit" class="btn btn-warning w-full">
@@ -2420,50 +2371,18 @@ app.get('/files', ensureLoggedIn, ensureServerAccess, async (req, res) => {
         return res.redirect('/?error=' + encodeURIComponent('غير مصرح لك بمشاهدة الملفات'));
     }
 
-    const files = [];
+    const filesDir = getFilesDirFor(userId, serverId);
     const currentPath = dir ? dir.replace(/\\/g, '/') : '';
-    const encodedCurrentPath = encodeFilePathKey(currentPath);
+    const absDir = resolveServerPath(filesDir, currentPath);
+    await fs.ensureDir(absDir);
 
-    // Store decoded keys to avoid duplicates and easily check for directories
-    const decodedEntries = new Set();
-    const potentialDirs = new Set();
-
-    for (const encodedFilePath of server.files.keys()) {
-        const filePath = decodeFilePathKey(encodedFilePath);
-        const relativePath = filePath.replace(/\\/g, '/');
-
-        if (currentPath === '' || relativePath.startsWith(currentPath + '/')) {
-            const parts = relativePath.substring(currentPath.length).split('/').filter(p => p);
-            if (parts.length > 0) {
-                const entryName = parts[0];
-                const entryPath = currentPath ? `${currentPath}/${entryName}` : entryName;
-                decodedEntries.add(entryPath);
-                if (parts.length > 1) {
-                    potentialDirs.add(entryPath); // Mark as potential directory
-                }
-            }
-        }
-    }
-
-    // Process the unique entries found
-    for (const decodedPath of decodedEntries) {
-        const name = path.basename(decodedPath);
-        const isDir = potentialDirs.has(decodedPath);
-                files.push({
-                    name,
-                    isDir,
-            relativePath: decodedPath, // Use decoded path for links/actions
-            isZip: !isDir && name.endsWith('.zip')
-                });
-            }
-
-    // Sort files (optional: folders first, then alphabetically)
-    files.sort((a, b) => {
-        if (a.isDir !== b.isDir) {
-            return a.isDir ? -1 : 1;
-        }
-        return a.name.localeCompare(b.name);
-    });
+    const dirents = await fs.readdir(absDir, { withFileTypes: true });
+    const files = dirents.map(d => ({
+        name: d.name,
+        isDir: d.isDirectory(),
+        relativePath: currentPath ? `${currentPath}/${d.name}`.replace(/\\/g,'/') : d.name,
+        isZip: !d.isDirectory() && d.name.endsWith('.zip')
+    })).sort((a,b)=> a.isDir===b.isDir ? a.name.localeCompare(b.name) : (a.isDir? -1:1));
 
     const parentDir = dir ? path.dirname(dir).replace(/\\/g, '/') : null;
     const queryParams = new URLSearchParams({ serverId });
@@ -2656,13 +2575,12 @@ app.get('/download-file', ensureLoggedIn, ensureServerAccess, async (req, res) =
     const { serverId, filePath, userId: targetUserId } = req.query;
     const userId = targetUserId || req.userId;
     const server = req.server;
-    const encodedFilePath = encodeFilePathKey(filePath);
-
-    if (!server.files.has(encodedFilePath)) {
+    const filesDir = getFilesDirFor(userId, serverId);
+    const absPath = resolveServerPath(filesDir, filePath);
+    if (!(await fs.pathExists(absPath))) {
         return res.redirect(`/files?serverId=${serverId}&userId=${userId}&error=الملف غير موجود`);
     }
-
-    const content = Buffer.from(server.files.get(encodedFilePath), 'base64');
+    const content = await fs.readFile(absPath);
     logServerEvent('تنزيل ملف', { userId: req.userId, serverId, file: filePath });
     res.setHeader('Content-Disposition', `attachment; filename="${path.basename(filePath)}"`);
     res.send(content);
@@ -2678,31 +2596,33 @@ app.get('/unzip-file', ensureLoggedIn, ensureServerAccess, async (req, res) => {
         return res.redirect('/?error=' + encodeURIComponent('غير مصرح لك بتعديل الملفات'));
     }
 
-    const encodedFilePath = encodeFilePathKey(filePath);
-    if (!server.files.has(encodedFilePath)) {
+    const filesDir = getFilesDirFor(userId, serverId);
+    const absPath = resolveServerPath(filesDir, filePath);
+    if (!(await fs.pathExists(absPath))) {
         return res.redirect(`/files?serverId=${serverId}&userId=${userId}&dir=${path.dirname(filePath)}&error=${encodeURIComponent('الملف غير موجود')}`);
     }
 
     try {
-        const fileContent = Buffer.from(server.files.get(encodedFilePath), 'base64');
+        const fileContent = await fs.readFile(absPath);
         const outputDir = path.dirname(filePath);
-        const tempDir = path.join(__dirname, 'temp', 'unzip', Date.now().toString());
-        await fs.ensureDir(tempDir);
-        const tempArchivePath = path.join(tempDir, 'temp-archive');
+        const { filesDir, tmpDir } = getServerStoragePaths(userId, serverId);
+        const extractSessionDir = path.join(tmpDir, `unzip-${Date.now()}`);
+        await fs.ensureDir(extractSessionDir);
+        const tempArchivePath = path.join(extractSessionDir, 'temp-archive');
         await fs.writeFile(tempArchivePath, fileContent);
 
         // دعم zip و tar.gz
         if (filePath.endsWith('.zip')) {
             await new Promise((resolve, reject) => {
                 fs.createReadStream(tempArchivePath)
-                    .pipe(unzipper.Extract({ path: tempDir }))
+                    .pipe(unzipper.Extract({ path: extractSessionDir }))
                     .on('close', resolve)
                     .on('error', reject);
             });
         } else if (filePath.endsWith('.tar.gz') || filePath.endsWith('.tgz')) {
-            await tar.x({ file: tempArchivePath, cwd: tempDir });
+            await tar.x({ file: tempArchivePath, cwd: extractSessionDir });
         } else {
-            await fs.remove(tempDir);
+            await fs.remove(extractSessionDir);
             return res.redirect(`/files?serverId=${serverId}&userId=${userId}&dir=${outputDir}&error=${encodeURIComponent('صيغة الأرشيف غير مدعومة')}`);
         }
 
@@ -2715,16 +2635,18 @@ app.get('/unzip-file', ensureLoggedIn, ensureServerAccess, async (req, res) => {
                 if (stat.isDirectory()) {
                     await processExtractedFiles(fullPath);
                 } else {
-                    const relativePath = path.relative(tempDir, fullPath);
+                    const relativePath = path.relative(extractSessionDir, fullPath);
                     const serverPath = path.join(outputDir, relativePath).replace(/\\/g, '/');
                     const content = await fs.readFile(fullPath);
-                    const encodedServerPath = encodeFilePathKey(serverPath);
-                    server.files.set(encodedServerPath, content.toString('base64'));
+                    const destAbsPath = path.join(filesDir, serverPath);
+                    await fs.ensureDir(path.dirname(destAbsPath));
+                    await fs.writeFile(destAbsPath, content);
+                    // DB map no longer the source of truth; optional: skip or keep in sync
                 }
             }
         };
-        await processExtractedFiles(tempDir);
-        await fs.remove(tempDir);
+        await processExtractedFiles(extractSessionDir);
+        await fs.remove(extractSessionDir);
                      await server.save(); 
                      logServerEvent('فك ضغط ملف', { userId: req.userId, serverId, filePath });
         res.redirect(`/files?serverId=${serverId}&userId=${userId}&dir=${outputDir}&success=${encodeURIComponent('تم فك الضغط بنجاح')}`);
@@ -2888,14 +2810,13 @@ app.get('/view-file', ensureLoggedIn, ensureServerAccess, async (req, res) => {
         return res.redirect('/?error=' + encodeURIComponent('غير مصرح لك بمشاهدة الملفات'));
     }
 
-    // Use encoded key for has and get
-    const encodedFilePath = encodeFilePathKey(filePath);
-    if (!server.files.has(encodedFilePath)) {
+    const filesDir = getFilesDirFor(userId, serverId);
+    const absPath = resolveServerPath(filesDir, filePath);
+    if (!(await fs.pathExists(absPath))) {
         return res.redirect(`/files?serverId=${serverId}&userId=${userId}&dir=${path.dirname(filePath)}&error=الملف غير موجود`);
     }
 
-    // Decode the Base64 content using the encoded key
-    const fileBuffer = Buffer.from(server.files.get(encodedFilePath), 'base64');
+    const fileBuffer = await fs.readFile(absPath);
  
     // Check if the file is likely binary (Keep your isBinaryContent function)
     // function isBinaryContent(buffer) { ... return true/false ... }
@@ -2986,13 +2907,13 @@ app.get('/edit-file', ensureLoggedIn, ensureServerAccess, async (req, res) => {
     if (!permissions.editFiles && !user.isAdmin && !req.isServerOwner) {
         return res.redirect('/?error=' + encodeURIComponent('غير مصرح لك بتعديل الملفات'));
     }
-    const encodedFilePath = encodeFilePathKey(filePath);
-
-    if (!server.files.has(encodedFilePath)) {
+    const filesDir2 = getFilesDirFor(userId, serverId);
+    const absPath2 = resolveServerPath(filesDir2, filePath);
+    if (!(await fs.pathExists(absPath2))) {
         return res.redirect(`/files?serverId=${serverId}&userId=${userId}&dir=${path.dirname(filePath)}&error=الملف غير موجود`);
     }
 
-    const fileContent = Buffer.from(server.files.get(encodedFilePath), 'base64').toString('utf8');
+    const fileContent = (await fs.readFile(absPath2)).toString('utf8');
     const queryParams = new URLSearchParams({ serverId, filePath });
     if (targetUserId) queryParams.append('userId', targetUserId);
 
@@ -3033,15 +2954,14 @@ app.post('/edit-file', ensureLoggedIn, ensureServerAccess, async (req, res) => {
     if (!permissions.editFiles && !user.isAdmin && !req.isServerOwner) {
         return res.redirect('/?error=' + encodeURIComponent('غير مصرح لك بتعديل الملفات'));
     }
-    const encodedFilePath = encodeFilePathKey(filePath);
-
-    if (!server.files.has(encodedFilePath)) {
+    const filesDir = getFilesDirFor(targetUserId, serverId);
+    const absPath = resolveServerPath(filesDir, filePath);
+    if (!(await fs.pathExists(absPath))) {
         return res.redirect(`/files?serverId=${serverId}&userId=${targetUserId}&dir=${path.dirname(filePath)}&error=الملف غير موجود`);
     }
 
     try {
-        server.files.set(encodedFilePath, Buffer.from(content, 'utf8').toString('base64'));
-        await server.save();
+        await fs.writeFile(absPath, content, 'utf8');
         logServerEvent('تعديل ملف', { userId: req.userId, serverId, filePath });
         res.redirect(`/view-file?serverId=${serverId}&userId=${targetUserId}&filePath=${encodeURIComponent(filePath)}&success=تم تعديل الملف بنجاح`);
     } catch (err) {
@@ -3067,19 +2987,20 @@ app.get('/archive-files', ensureLoggedIn, ensureServerAccess, async (req, res) =
         return res.redirect(`/files?serverId=${serverId}&userId=${userId}&error=خطأ في تحديد الملفات`);
     }
 
-    // Use a fixed directory or ensure /tmp exists and is writable
-    const tempDir = path.join(__dirname, 'temp'); 
-    await fs.ensureDir(tempDir);
+    // Use per-server tmp inside persistent storage
+    const { filesDir, tmpDir } = getServerStoragePaths(userId, serverId);
     const zipName = `archive-${Date.now()}.zip`;
-    const zipPath = path.join(tempDir, zipName); 
+    const zipPath = path.join(tmpDir, zipName);
     const output = fs.createWriteStream(zipPath);
     const archive = archiver('zip', { zlib: { level: 9 } });
 
     output.on('close', async () => {
         try {
-            const zipContent = await fs.readFile(zipPath, 'base64');
-            const encodedZipName = encodeFilePathKey(zipName); // Encode the archive name itself if storing in root
-            server.files.set(encodedZipName, zipContent);
+            const zipBuffer = await fs.readFile(zipPath);
+            const destAbsPath = path.join(filesDir, zipName);
+            await fs.writeFile(destAbsPath, zipBuffer);
+            const encodedZipName = encodeFilePathKey(zipName);
+            server.files.set(encodedZipName, zipBuffer.toString('base64'));
             await server.save();
             await fs.unlink(zipPath);
             logServerEvent('أرشفة ملفات', { userId: req.userId, serverId, files: filesToArchivePaths });
@@ -3154,11 +3075,10 @@ app.get('/download-files', ensureLoggedIn, ensureServerAccess, async (req, res) 
          // If it's not a file or doesn't exist as a key, it might be a directory, proceed to zipping.
     }
 
-    // Use a fixed directory or ensure /tmp exists and is writable
-    const tempDir = path.join(__dirname, 'temp'); 
-    await fs.ensureDir(tempDir);
+    // Use per-server tmp inside persistent storage for the transient archive
+    const { tmpDir } = getServerStoragePaths(userId, serverId);
     const zipName = `download-${Date.now()}.zip`;
-    const zipPath = path.join(tempDir, zipName); 
+    const zipPath = path.join(tmpDir, zipName);
     const output = fs.createWriteStream(zipPath);
     const archive = archiver('zip', { zlib: { level: 9 } });
 
@@ -3310,7 +3230,7 @@ app.get('/delete-files', ensureLoggedIn, ensureServerAccess, async (req, res) =>
 app.post('/upload-file', ensureLoggedIn, async (req, res) => {
     try {
         const form = formidable({
-            uploadDir: path.join(__dirname, 'temp'),
+            uploadDir: tempDir,
             keepExtensions: true,
             maxFileSize: 50 * 1024 * 1024 // Example: 50MB limit
         });
@@ -3378,19 +3298,21 @@ app.post('/upload-file', ensureLoggedIn, async (req, res) => {
 
         const file = files.file[0];
         const newPath = path.join(dir, file.originalFilename || path.basename(file.filepath)).replace(/\\/g, '/');
+        const { filesDir } = getServerStoragePaths(targetUserId, serverId);
+        const destAbsPath = path.join(filesDir, newPath);
+        await fs.ensureDir(path.dirname(destAbsPath));
         // Use encoded key for set
         const encodedNewPath = encodeFilePathKey(newPath); 
 
         try {
-            const content = fs.readFileSync(file.filepath);
-            // Use encoded key for set
-            server.files.set(encodedNewPath, content.toString('base64')); 
+            await fs.move(file.filepath, destAbsPath, { overwrite: true });
+            const content = await fs.readFile(destAbsPath);
+            server.files.set(encodedNewPath, content.toString('base64'));
             await server.save();
-            fs.unlinkSync(file.filepath); // Clean up temp file
         } catch (err) {
             console.error(`Failed to process file ${newPath}:`, err);
-             // Clean up temp file if it exists
-            if (await fs.pathExists(file.filepath)) { await fs.unlink(file.filepath); }
+            try { if (await fs.pathExists(file.filepath)) { await fs.unlink(file.filepath); } } catch {}
+            try { if (await fs.pathExists(destAbsPath)) { await fs.unlink(destAbsPath); } } catch {}
             return res.redirect(`/files?serverId=${serverId}&userId=${targetUserId}&dir=${dir}&error=خطأ أثناء رفع الملف`);
         }
 
@@ -4383,28 +4305,10 @@ app.get('/logout', (req, res) => {
     res.redirect('/login');
 });
 
-const startServerInBackground = async (serverId, targetUserId, server, tempDir, consoleLogs, runningProcesses, serverStartTime, wss, formatConsoleOutput, trimLogs, decodeFilePathKey, logServerEvent) => {
-    const serverDir = path.join(tempDir, targetUserId, serverId);
+const startServerInBackground = async (serverId, targetUserId, server, _tempDir, consoleLogs, runningProcesses, serverStartTime, wss, formatConsoleOutput, trimLogs, decodeFilePathKey, logServerEvent) => {
+    const { filesDir } = getServerStoragePaths(targetUserId, serverId);
+    const serverDir = filesDir; // persist all runtime changes inside files
     try {
-        // تنظيف المجلد المؤقت إذا كان موجودًا - بشكل غير متزامن ومعالجة الأخطاء
-        if (fs.existsSync(serverDir)) {
-            try {
-                await fs.remove(serverDir);
-            } catch (rmErr) {
-                // Log EBUSY or other errors during initial cleanup but don't stop
-                console.error(`Warning: Failed to initially remove temp dir ${serverDir}:`, rmErr);
-                const removeWarnMsg = formatConsoleOutput(`⚠️ تحذير: فشل تنظيف المجلد المؤقت القديم (${rmErr.code}). سيتم محاولة الكتابة فوقه.`);
-                // Ensure logs are initialized before pushing
-                initializeServerLogs(targetUserId, serverId);
-                consoleLogs[`${targetUserId}-${serverId}`].push(removeWarnMsg);
-                trimLogs(consoleLogs[`${targetUserId}-${serverId}`]);
-                wss.clients.forEach(client => {
-                    if (client.userId === targetUserId && client.serverId === serverId && client.readyState === client.OPEN) {
-                        client.send(removeWarnMsg);
-                    }
-                });
-            }
-        }
         await fs.ensureDir(serverDir);
 
         // تهيئة سجل الكونسول مع مسح السجل السابق عند بدء التشغيل
@@ -4423,7 +4327,7 @@ const startServerInBackground = async (serverId, targetUserId, server, tempDir, 
                 }
             });
         } catch (e) { /* ignore */ }
-        const startMsg = formatConsoleOutput('🚀 جاري تجهيز السيرفر... برجاء الانتظار');
+        const startMsg = formatConsoleOutput('جاري تجهيز السيرفر... برجاء الانتظار');
         consoleLogs[`${targetUserId}-${serverId}`].push(startMsg);
         saveConsoleLog(targetUserId, serverId, startMsg);
         wss.clients.forEach(client => {
@@ -4432,7 +4336,7 @@ const startServerInBackground = async (serverId, targetUserId, server, tempDir, 
             }
         });
 
-        // كتابة ملفات السيرفر
+        // كتابة ملفات السيرفر (من المخزن إلى مساحة التشغيل)
         for (const [encodedFilePath, fileContent] of server.files.entries()) {
             const filePath = decodeFilePathKey(encodedFilePath);
             const content = Buffer.from(fileContent, 'base64');
@@ -4450,7 +4354,7 @@ const startServerInBackground = async (serverId, targetUserId, server, tempDir, 
         if (userPackages && userPackages.trim() !== '') {
             const packagesToInstall = userPackages.trim().split(/\s+/).filter(pkg => pkg);
             if (packagesToInstall.length > 0) {
-                const installingUserPkgsMsg = formatConsoleOutput(`📦 جاري تثبيت الحزم المحددة من إعدادات بدء التشغيل: ${packagesToInstall.join(', ')}...`);
+                const installingUserPkgsMsg = formatConsoleOutput(`جاري تثبيت الحزم المحددة من إعدادات بدء التشغيل: ${packagesToInstall.join(', ')}...`);
                 consoleLogs[`${targetUserId}-${serverId}`].push(installingUserPkgsMsg);
                 wss.clients.forEach(client => {
                     if (client.userId === targetUserId && client.serverId === serverId && client.readyState === client.OPEN) {
@@ -4474,12 +4378,12 @@ const startServerInBackground = async (serverId, targetUserId, server, tempDir, 
                         saveConsoleLog(targetUserId, serverId, formattedError);
                         wss.clients.forEach(client => client.userId === targetUserId && client.serverId === serverId && client.readyState === client.OPEN && client.send(formattedError));
                     }
-                    const doneUserPkgsMsg = formatConsoleOutput('✅ تم تثبيت الحزم المحددة من إعدادات بدء التشغيل بنجاح.');
+                    const doneUserPkgsMsg = formatConsoleOutput('تم تثبيت الحزم المحددة من إعدادات بدء التشغيل بنجاح.');
                     consoleLogs[`${targetUserId}-${serverId}`].push(doneUserPkgsMsg);
                     saveConsoleLog(targetUserId, serverId, doneUserPkgsMsg);
                     wss.clients.forEach(client => client.userId === targetUserId && client.serverId === serverId && client.readyState === client.OPEN && client.send(doneUserPkgsMsg));
                 } catch (error) {
-                    const formattedError = formatConsoleOutput(`❌ خطأ في تثبيت الحزم المحددة من إعدادات بدء التشغيل: ${error.message}`);
+                    const formattedError = formatConsoleOutput(`خطأ في تثبيت الحزم المحددة من إعدادات بدء التشغيل: ${error.message}`);
                     consoleLogs[`${targetUserId}-${serverId}`].push(formattedError);
                     wss.clients.forEach(client => client.userId === targetUserId && client.serverId === serverId && client.readyState === client.OPEN && client.send(formattedError));
                 }
@@ -4489,7 +4393,7 @@ const startServerInBackground = async (serverId, targetUserId, server, tempDir, 
         // التحقق من وجود الملف الرئيسي
         const mainFilePath = path.join(serverDir, mainFile);
         if (!fs.existsSync(mainFilePath)) {
-            const errorMsg = formatConsoleOutput(`❌ ملف التشغيل الرئيسي (${mainFile}) غير موجود`);
+            const errorMsg = formatConsoleOutput(`ملف التشغيل الرئيسي (${mainFile}) غير موجود`);
             consoleLogs[`${targetUserId}-${serverId}`].push(errorMsg);
             saveConsoleLog(targetUserId, serverId, errorMsg);
             wss.clients.forEach(client => {
@@ -4503,7 +4407,7 @@ const startServerInBackground = async (serverId, targetUserId, server, tempDir, 
         // التحقق من وجود package.json وتثبيت الحزم
         const packageJsonPath = path.join(serverDir, 'package.json');
         if (fs.existsSync(packageJsonPath)) {
-            const installingMsg = formatConsoleOutput('📦 جاري تثبيت الحزم المطلوبة...');
+            const installingMsg = formatConsoleOutput('جاري تثبيت الحزم المطلوبة...');
             consoleLogs[`${targetUserId}-${serverId}`].push(installingMsg);
             saveConsoleLog(targetUserId, serverId, installingMsg);
             wss.clients.forEach(client => {
@@ -4537,7 +4441,7 @@ const startServerInBackground = async (serverId, targetUserId, server, tempDir, 
                         }
                     });
                 }
-                const doneMsg = formatConsoleOutput('✅ تم تثبيت الحزم بنجاح. جاري تشغيل السيرفر...');
+                const doneMsg = formatConsoleOutput('تم تثبيت الحزم بنجاح. جاري تشغيل السيرفر...');
                 consoleLogs[`${targetUserId}-${serverId}`].push(doneMsg);
                 saveConsoleLog(targetUserId, serverId, doneMsg);
                 wss.clients.forEach(client => {
@@ -4546,7 +4450,7 @@ const startServerInBackground = async (serverId, targetUserId, server, tempDir, 
                     }
                 });
             } catch (error) {
-                const formattedError = formatConsoleOutput(`❌ خطأ في تثبيت الحزم: ${error.message}`);
+                const formattedError = formatConsoleOutput(`خطأ في تثبيت الحزم: ${error.message}`);
                 consoleLogs[`${targetUserId}-${serverId}`].push(formattedError);
                 saveConsoleLog(targetUserId, serverId, formattedError);
                 wss.clients.forEach(client => {
@@ -4576,7 +4480,7 @@ const startServerInBackground = async (serverId, targetUserId, server, tempDir, 
         serverStartTime[`${targetUserId}-${serverId}`] = Date.now();
         setProcessState(targetUserId, serverId, true, serverStartTime[`${targetUserId}-${serverId}`]);
 
-        const startSuccessMsg = formatConsoleOutput(`✅ تم تشغيل السيرفر بنجاح على المنفذ ${port}`);
+        const startSuccessMsg = formatConsoleOutput(`تم تشغيل السيرفر بنجاح على المنفذ ${port}`);
         consoleLogs[`${targetUserId}-${serverId}`].push(startSuccessMsg);
         saveConsoleLog(targetUserId, serverId, startSuccessMsg);
         wss.clients.forEach(client => {
@@ -4612,12 +4516,12 @@ const startServerInBackground = async (serverId, targetUserId, server, tempDir, 
         });
 
         serverProcess.on('close', async (code) => {
-            const closeMessage = formatConsoleOutput(`❌ توقف السيرفر (رمز الخروج: ${code})`);
+            const closeMessage = formatConsoleOutput(`توقف السيرفر (رمز الخروج: ${code})`);
             consoleLogs[`${targetUserId}-${serverId}`].push(closeMessage);
             trimLogs(consoleLogs[`${targetUserId}-${serverId}`]);
             delete runningProcesses[targetUserId][serverId];
             setProcessState(targetUserId, serverId, false, null);
-            await fs.remove(serverDir).catch(() => {});
+            // do not remove files; keep persisted changes
 
             wss.clients.forEach(client => {
                 if (client.userId === targetUserId && client.serverId === serverId && client.readyState === client.OPEN) {
@@ -4627,12 +4531,12 @@ const startServerInBackground = async (serverId, targetUserId, server, tempDir, 
         });
 
         serverProcess.on('error', async (error) => {
-            const errorMsg = formatConsoleOutput(`❌ خطأ في بدء تشغيل السيرفر: ${error.message}`);
+            const errorMsg = formatConsoleOutput(`خطأ في بدء تشغيل السيرفر: ${error.message}`);
             consoleLogs[`${targetUserId}-${serverId}`].push(errorMsg);
             trimLogs(consoleLogs[`${targetUserId}-${serverId}`]);
             delete runningProcesses[targetUserId][serverId];
             setProcessState(targetUserId, serverId, false, null);
-            fs.removeSync(serverDir);
+            // do not remove files; keep persisted changes
             wss.clients.forEach(client => {
                 if (client.userId === targetUserId && client.serverId === serverId && client.readyState === client.OPEN) {
                     client.send(errorMsg);
@@ -4642,7 +4546,7 @@ const startServerInBackground = async (serverId, targetUserId, server, tempDir, 
 
         logServerEvent('تشغيل سيرفر', { userId: targetUserId, serverId, port });
     } catch (error) {
-        const errorMsg = formatConsoleOutput(`❌ حدث خطأ أثناء تشغيل السيرفر: ${error.message}`);
+        const errorMsg = formatConsoleOutput(`حدث خطأ أثناء تشغيل السيرفر: ${error.message}`);
         consoleLogs[`${targetUserId}-${serverId}`].push(errorMsg);
         wss.clients.forEach(client => {
             if (client.userId === targetUserId && client.serverId === serverId && client.readyState === client.OPEN) {
@@ -4696,7 +4600,8 @@ app.post('/stop-server', ensureLoggedIn, ensureServerAccess, async (req, res) =>
     consoleLogs[`${targetUserId}-${serverId}`].push(stopMsg);
     saveConsoleLog(targetUserId, serverId, stopMsg);
     trimLogs(consoleLogs[`${targetUserId}-${serverId}`]);
-    fs.removeSync(path.join(__dirname, 'temp', targetUserId, serverId));
+    // لا نقوم بحذف أي ملفات من مساحة السيرفر بعد الإيقاف للحفاظ على البيانات
+    try { setProcessState(targetUserId, serverId, false, null); } catch {}
 
     wss.clients.forEach(client => {
         if (client.userId === targetUserId && client.serverId === serverId && client.readyState === client.OPEN) {
@@ -4724,7 +4629,8 @@ app.post('/restart-server', ensureLoggedIn, ensureServerAccess, async (req, res)
     // Initialize logs for this server if they don't exist yet
     initializeServerLogs(targetUserId, serverId);
 
-    const serverSpecificTempDir = path.join(__dirname, 'temp', targetUserId, serverId);
+    const { filesDir } = getServerStoragePaths(targetUserId, serverId);
+    const serverSpecificTempDir = filesDir; // no cleanup
 
     if (runningProcesses[targetUserId]?.[serverId]) {
         const stopMsg = formatConsoleOutput('[معلومات] إيقاف السيرفر لإعادة التشغيل...');
@@ -4741,18 +4647,10 @@ app.post('/restart-server', ensureLoggedIn, ensureServerAccess, async (req, res)
         
         // Short delay to allow process to terminate before removing directory
         await new Promise(resolve => setTimeout(resolve, 1000)); 
-        if (fs.existsSync(serverSpecificTempDir)) {
-            await fs.remove(serverSpecificTempDir).catch(err => {
-                console.error(`Error removing temp dir during restart: ${serverSpecificTempDir}`, err);
-            });
-        }
+        // لا نقوم بإزالة ملفات السيرفر عند إعادة التشغيل
     } else {
         // If server wasn't running, still good to ensure temp dir is clean for a fresh start
-        if (fs.existsSync(serverSpecificTempDir)) {
-            await fs.remove(serverSpecificTempDir).catch(err => {
-                console.error(`Error removing temp dir (server not running): ${serverSpecificTempDir}`, err);
-            });
-        }
+        // لا نقوم بإزالة ملفات السيرفر حتى إن لم يكن يعمل
     }
 
     // Clear logs on restart as well
@@ -4776,7 +4674,7 @@ app.post('/restart-server', ensureLoggedIn, ensureServerAccess, async (req, res)
         }
     });
 
-    const globalTempDir = path.join(__dirname, 'temp'); // Base temp directory for all servers
+    const globalTempDir = tempDir; // not used anymore for runtime, kept for signature
 
     // Call startServerInBackground to handle the actual start with current settings
     startServerInBackground(
@@ -4794,7 +4692,7 @@ app.post('/restart-server', ensureLoggedIn, ensureServerAccess, async (req, res)
         logServerEvent
     ).catch(err => {
         console.error(`Error during startServerInBackground from restart for server ${serverId}, user ${targetUserId}:`, err);
-        const errorMsg = formatConsoleOutput(`❌ خطأ فادح أثناء عملية إعادة التشغيل: ${err.message}`);
+        const errorMsg = formatConsoleOutput(`خطأ فادح أثناء عملية إعادة التشغيل: ${err.message}`);
         consoleLogs[`${targetUserId}-${serverId}`].push(errorMsg);
         trimLogs(consoleLogs[`${targetUserId}-${serverId}`]);
         wss.clients.forEach(client => {
@@ -4977,7 +4875,7 @@ app.post('/kill-server', ensureLoggedIn, ensureServerAccess, async (req, res) =>
         } catch (killError) {
             console.error(`Error sending SIGKILL to process for server ${serverId}:`, killError);
             // Log error to user console even if kill signal failed (process might have already exited)
-            const killErrorMsg = formatConsoleOutput(`⚠️ تحذير: حدث خطأ أثناء محاولة إرسال إشارة الإيقاف القسري: ${killError.message}`);
+            const killErrorMsg = formatConsoleOutput(`تحذير: حدث خطأ أثناء محاولة إرسال إشارة الإيقاف القسري: ${killError.message}`);
             consoleLogs[logKey].push(killErrorMsg);
             trimLogs(consoleLogs[logKey]);
         wss.clients.forEach(client => {
@@ -4991,11 +4889,12 @@ app.post('/kill-server', ensureLoggedIn, ensureServerAccess, async (req, res) =>
         delete runningProcesses[targetUserId]?.[serverId]; // Use optional chaining
         
         // Attempt to clean up temp directory asynchronously
-        const serverDir = path.join(__dirname, 'temp', targetUserId, serverId);
+        const { baseDir } = getServerStoragePaths(targetUserId, serverId);
+        const serverDir = path.join(baseDir, 'runtime');
         fs.remove(serverDir).catch(err => {
             console.error(`Error removing temp dir after kill for server ${serverId}: ${serverDir}`, err);
             // Log warning about cleanup failure (optional)
-            const cleanupWarnMsg = formatConsoleOutput(`⚠️ تحذير: فشل حذف المجلد المؤقت (${path.basename(serverDir)}) تلقائياً بعد الإيقاف القسري.`); // Show only last part of dir
+            const cleanupWarnMsg = formatConsoleOutput(`تحذير: فشل حذف المجلد المؤقت (${path.basename(serverDir)}) تلقائياً بعد الإيقاف القسري.`); // Show only last part of dir
             consoleLogs[logKey].push(cleanupWarnMsg);
             trimLogs(consoleLogs[logKey]);
         wss.clients.forEach(client => {
@@ -5020,7 +4919,8 @@ app.post('/kill-server', ensureLoggedIn, ensureServerAccess, async (req, res) =>
         });
         
         // Still attempt cleanup in case temp dir was left behind
-        const serverDir = path.join(__dirname, 'temp', targetUserId, serverId);
+        const { baseDir } = getServerStoragePaths(targetUserId, serverId);
+        const serverDir = path.join(baseDir, 'runtime');
          fs.remove(serverDir).catch(err => {
             // Log silently if cleanup fails when process wasn't found
             console.error(`Error removing temp dir (server not running) for server ${serverId}: ${serverDir}`, err);

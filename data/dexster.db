@@ -314,104 +314,199 @@
         "serverId": "ac9d3a61-d1fe-4286-bd87-51ae749a84f9",
         "port": "3000"
       }
+    },
+    {
+      "id": 29,
+      "timestamp": 1759246394653,
+      "event": "تسجيل دخول",
+      "details": {
+        "userId": "2f625a9f-305e-4084-9cad-820fc16f8880"
+      }
+    },
+    {
+      "id": 30,
+      "timestamp": 1759246650821,
+      "event": "تسجيل دخول",
+      "details": {
+        "userId": "2f625a9f-305e-4084-9cad-820fc16f8880"
+      }
+    },
+    {
+      "id": 31,
+      "timestamp": 1759246861419,
+      "event": "إعادة تشغيل سيرفر",
+      "details": {
+        "userId": "2f625a9f-305e-4084-9cad-820fc16f8880",
+        "serverId": "ac9d3a61-d1fe-4286-bd87-51ae749a84f9"
+      }
+    },
+    {
+      "id": 32,
+      "timestamp": 1759246961641,
+      "event": "تشغيل سيرفر",
+      "details": {
+        "userId": "2f625a9f-305e-4084-9cad-820fc16f8880",
+        "serverId": "ac9d3a61-d1fe-4286-bd87-51ae749a84f9",
+        "port": "3000"
+      }
+    },
+    {
+      "id": 33,
+      "timestamp": 1759246976474,
+      "event": "تشغيل سيرفر",
+      "details": {
+        "userId": "2f625a9f-305e-4084-9cad-820fc16f8880",
+        "serverId": "ac9d3a61-d1fe-4286-bd87-51ae749a84f9",
+        "port": "3000"
+      }
+    },
+    {
+      "id": 34,
+      "timestamp": 1759247237995,
+      "event": "تسجيل دخول",
+      "details": {
+        "userId": "2f625a9f-305e-4084-9cad-820fc16f8880"
+      }
+    },
+    {
+      "id": 35,
+      "timestamp": 1759247571129,
+      "event": "تسجيل دخول",
+      "details": {
+        "userId": "2f625a9f-305e-4084-9cad-820fc16f8880"
+      }
+    },
+    {
+      "id": 36,
+      "timestamp": 1759247733106,
+      "event": "تشغيل سيرفر",
+      "details": {
+        "userId": "2f625a9f-305e-4084-9cad-820fc16f8880",
+        "serverId": "ac9d3a61-d1fe-4286-bd87-51ae749a84f9",
+        "port": "3000"
+      }
+    },
+    {
+      "id": 37,
+      "timestamp": 1759248691662,
+      "event": "تسجيل دخول",
+      "details": {
+        "userId": "2f625a9f-305e-4084-9cad-820fc16f8880"
+      }
+    },
+    {
+      "id": 38,
+      "timestamp": 1759248762770,
+      "event": "تشغيل سيرفر",
+      "details": {
+        "userId": "2f625a9f-305e-4084-9cad-820fc16f8880",
+        "serverId": "ac9d3a61-d1fe-4286-bd87-51ae749a84f9",
+        "port": "3000"
+      }
     }
   ],
   "appConsoleLogs": [
     {
       "userId": "2f625a9f-305e-4084-9cad-820fc16f8880",
       "serverId": "ac9d3a61-d1fe-4286-bd87-51ae749a84f9",
-      "timestamp": 1759227840369,
-      "content": "<span class='console-log-info'><span class='text-gray-400'>[١:٢٣:٥٩ م]</span> <i class='fas fa-terminal text-slate-400 mr-1'></i> 🚀 جاري تجهيز السيرفر... برجاء الانتظار</span>"
+      "timestamp": 1759248740495,
+      "content": "<span class='console-log-info'><span class='text-gray-400'>[٧:١٢:٢٠ م]</span> <i class='fas fa-terminal text-purple-400 mr-2'></i> جاري تجهيز السيرفر... برجاء الانتظار</span>"
     },
     {
       "userId": "2f625a9f-305e-4084-9cad-820fc16f8880",
       "serverId": "ac9d3a61-d1fe-4286-bd87-51ae749a84f9",
-      "timestamp": 1759227841298,
-      "content": "<span class='console-log-success'><span class='text-gray-400'>[١:٢٤:٠١ م]</span> <i class='fas fa-check-circle text-green-500 mr-1'></i> 📦 جاري تثبيت الحزم المطلوبة...</span>"
+      "timestamp": 1759248740837,
+      "content": "<span class='console-log-success'><span class='text-gray-400'>[٧:١٢:٢٠ م]</span> <i class='fas fa-circle-check text-purple-400 mr-2'></i> جاري تثبيت الحزم المطلوبة...</span>"
     },
     {
       "userId": "2f625a9f-305e-4084-9cad-820fc16f8880",
       "serverId": "ac9d3a61-d1fe-4286-bd87-51ae749a84f9",
-      "timestamp": 1759227891514,
-      "content": "<span class='console-log-info'><span class='text-gray-400'>[١:٢٤:٥١ م]</span> <i class='fas fa-terminal text-slate-400 mr-1'></i> added 114 packages, and audited 115 packages in 44s\n\n13 packages are looking for funding\n  run `npm fund` for details\n\n2 high severity vulnerabilities\n\nSome issues need review, and may require choosing\na different dependency.\n\nRun `npm audit` for details.</span>"
+      "timestamp": 1759248762698,
+      "content": "<span class='console-log-info'><span class='text-gray-400'>[٧:١٢:٤٢ م]</span> <i class='fas fa-terminal text-purple-400 mr-2'></i> up to date, audited 115 packages in 17s\n\n13 packages are looking for funding\n  run `npm fund` for details\n\n2 high severity vulnerabilities\n\nSome issues need review, and may require choosing\na different dependency.\n\nRun `npm audit` for details.</span>"
     },
     {
       "userId": "2f625a9f-305e-4084-9cad-820fc16f8880",
       "serverId": "ac9d3a61-d1fe-4286-bd87-51ae749a84f9",
-      "timestamp": 1759227891516,
-      "content": "<span class='console-log-warn'><span class='text-gray-400'>[١:٢٤:٥١ م]</span> <i class='fas fa-exclamation-triangle text-yellow-400 mr-1'></i> npm warn deprecated string-similarity@4.0.4: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.\nnpm warn deprecated @discordjs/voice@0.16.1: This version uses deprecated encryption modes. Please use a newer version.\nnpm warn deprecated @aikochan2k6/qrcode-terminal@0.12.1: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.\nnpm warn deprecated discord.js-selfbot-v13@2.15.1: This version is deprecated.</span>"
+      "timestamp": 1759248762701,
+      "content": "<span class='console-log-success'><span class='text-gray-400'>[٧:١٢:٤٢ م]</span> <i class='fas fa-circle-check text-purple-400 mr-2'></i> تم تثبيت الحزم بنجاح. جاري تشغيل السيرفر...</span>"
     },
     {
       "userId": "2f625a9f-305e-4084-9cad-820fc16f8880",
       "serverId": "ac9d3a61-d1fe-4286-bd87-51ae749a84f9",
-      "timestamp": 1759227891519,
-      "content": "<span class='console-log-success'><span class='text-gray-400'>[١:٢٤:٥١ م]</span> <i class='fas fa-check-circle text-green-500 mr-1'></i> ✅ تم تثبيت الحزم بنجاح. جاري تشغيل السيرفر...</span>"
+      "timestamp": 1759248762766,
+      "content": "<span class='console-log-success'><span class='text-gray-400'>[٧:١٢:٤٢ م]</span> <i class='fas fa-circle-check text-purple-400 mr-2'></i> تم تشغيل السيرفر بنجاح على المنفذ 3000</span>"
     },
     {
       "userId": "2f625a9f-305e-4084-9cad-820fc16f8880",
       "serverId": "ac9d3a61-d1fe-4286-bd87-51ae749a84f9",
-      "timestamp": 1759227891592,
-      "content": "<span class='console-log-success'><span class='text-gray-400'>[١:٢٤:٥١ م]</span> <i class='fas fa-check-circle text-green-500 mr-1'></i> ✅ تم تشغيل السيرفر بنجاح على المنفذ 3000</span>"
+      "timestamp": 1759248762820,
+      "content": "<span class='console-log-info'><span class='text-gray-400'>[٧:١٢:٤٢ م]</span> <i class='fas fa-terminal text-purple-400 mr-2'></i> ██████╗ ███████╗██╗  ██╗███████╗████████╗███████╗██████╗           \n        ██╔══██╗██╔════╝╚██╗██╔╝██╔════╝╚══██╔══╝██╔════╝██╔═ ██╗    \n        ██║  ██║█████╗   ╚███╔╝ ███████╗   ██║   █████╗  ██████    \n        ██║  ██║██╔══╝   ██╔██╗ ╚════██║   ██║   ██╔══╝  ██    ██╗    \n        ██████╔╝███████╗██╔╝ ██╗███████║   ██║   ███████╗██║   ██║    \n        ╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝   ╚═╝   ╚══════╝╚═╝   ╚═╝</span>"
     },
     {
       "userId": "2f625a9f-305e-4084-9cad-820fc16f8880",
       "serverId": "ac9d3a61-d1fe-4286-bd87-51ae749a84f9",
-      "timestamp": 1759227891793,
-      "content": "<span class='console-log-info'><span class='text-gray-400'>[١:٢٤:٥١ م]</span> <i class='fas fa-terminal text-slate-400 mr-1'></i> ██████╗ ███████╗██╗  ██╗███████╗████████╗███████╗██████╗           \n        ██╔══██╗██╔════╝╚██╗██╔╝██╔════╝╚══██╔══╝██╔════╝██╔═ ██╗    \n        ██║  ██║█████╗   ╚███╔╝ ███████╗   ██║   █████╗  ██████    \n        ██║  ██║██╔══╝   ██╔██╗ ╚════██║   ██║   ██╔══╝  ██    ██╗    \n        ██████╔╝███████╗██╔╝ ██╗███████║   ██║   ███████╗██║   ██║    \n        ╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝   ╚═╝   ╚══════╝╚═╝   ╚═╝</span>"
+      "timestamp": 1759248762825,
+      "content": "<span class='console-log-success'><span class='text-gray-400'>[٧:١٢:٤٢ م]</span> <i class='fas fa-circle-check text-purple-400 mr-2'></i> → Loading configuration...\n✓ Loaded 1 tokens\n✓ Configuration loaded successfully\n\n--- Configuration ---\nℹ Server ID: 1407361027741319409\nℹ Invite Link: https://discord.gg/Sr5Bg6Kv\nℹ Token Count: 1</span>"
     },
     {
       "userId": "2f625a9f-305e-4084-9cad-820fc16f8880",
       "serverId": "ac9d3a61-d1fe-4286-bd87-51ae749a84f9",
-      "timestamp": 1759227891828,
-      "content": "<span class='console-log-success'><span class='text-gray-400'>[١:٢٤:٥١ م]</span> <i class='fas fa-check-circle text-green-500 mr-1'></i> → Loading configuration...\n✓ Loaded 1 tokens\n✓ Configuration loaded successfully\n\n--- Configuration ---\nℹ Server ID: 1407361027741319409\nℹ Invite Link: https://discord.gg/Sr5Bg6Kv\nℹ Token Count: 1\nℹ Delay between tokens: 5s\nℹ Delay between boosts: 3s\nℹ Max boosts per token: All available\n\nStarting Boost Process\n\n--- Token 1/1 ---\n→ Joining server...</span>"
+      "timestamp": 1759248762832,
+      "content": "<span class='console-log-info'><span class='text-gray-400'>[٧:١٢:٤٢ م]</span> <i class='fas fa-terminal text-purple-400 mr-2'></i> ℹ Delay between tokens: 5s</span>"
     },
     {
       "userId": "2f625a9f-305e-4084-9cad-820fc16f8880",
       "serverId": "ac9d3a61-d1fe-4286-bd87-51ae749a84f9",
-      "timestamp": 1759227892602,
-      "content": "<span class='console-log-info'><span class='text-gray-400'>[١:٢٤:٥٢ م]</span> <i class='fas fa-terminal text-slate-400 mr-1'></i> ✓ Joined server: ...FlGRRNHnJU</span>"
+      "timestamp": 1759248762856,
+      "content": "<span class='console-log-info'><span class='text-gray-400'>[٧:١٢:٤٢ م]</span> <i class='fas fa-terminal text-purple-400 mr-2'></i> ℹ Delay between boosts: 3s\nℹ Max boosts per token: All available\n\nStarting Boost Process\n\n--- Token 1/1 ---\n→ Joining server...</span>"
     },
     {
       "userId": "2f625a9f-305e-4084-9cad-820fc16f8880",
       "serverId": "ac9d3a61-d1fe-4286-bd87-51ae749a84f9",
-      "timestamp": 1759227892605,
-      "content": "<span class='console-log-info'><span class='text-gray-400'>[١:٢٤:٥٢ م]</span> <i class='fas fa-terminal text-slate-400 mr-1'></i> → Waiting 5s before boosting...</span>"
+      "timestamp": 1759248763483,
+      "content": "<span class='console-log-info'><span class='text-gray-400'>[٧:١٢:٤٣ م]</span> <i class='fas fa-terminal text-purple-400 mr-2'></i> ✓ Joined server: ...FlGRRNHnJU</span>"
     },
     {
       "userId": "2f625a9f-305e-4084-9cad-820fc16f8880",
       "serverId": "ac9d3a61-d1fe-4286-bd87-51ae749a84f9",
-      "timestamp": 1759227897610,
-      "content": "<span class='console-log-info'><span class='text-gray-400'>[١:٢٤:٥٧ م]</span> <i class='fas fa-terminal text-slate-400 mr-1'></i> → Checking Nitro status...</span>"
+      "timestamp": 1759248763485,
+      "content": "<span class='console-log-info'><span class='text-gray-400'>[٧:١٢:٤٣ م]</span> <i class='fas fa-terminal text-purple-400 mr-2'></i> → Waiting 5s before boosting...</span>"
     },
     {
       "userId": "2f625a9f-305e-4084-9cad-820fc16f8880",
       "serverId": "ac9d3a61-d1fe-4286-bd87-51ae749a84f9",
-      "timestamp": 1759227898039,
-      "content": "<span class='console-log-info'><span class='text-gray-400'>[١:٢٤:٥٨ م]</span> <i class='fas fa-terminal text-slate-400 mr-1'></i> ✓ Token has nitro.</span>"
+      "timestamp": 1759248768491,
+      "content": "<span class='console-log-info'><span class='text-gray-400'>[٧:١٢:٤٨ م]</span> <i class='fas fa-terminal text-purple-400 mr-2'></i> → Checking Nitro status...</span>"
     },
     {
       "userId": "2f625a9f-305e-4084-9cad-820fc16f8880",
       "serverId": "ac9d3a61-d1fe-4286-bd87-51ae749a84f9",
-      "timestamp": 1759227898041,
-      "content": "<span class='console-log-info'><span class='text-gray-400'>[١:٢٤:٥٨ م]</span> <i class='fas fa-terminal text-slate-400 mr-1'></i> → Applying boosts...\n→ Applying 2 boost(s) from 2 available...</span>"
+      "timestamp": 1759248768944,
+      "content": "<span class='console-log-info'><span class='text-gray-400'>[٧:١٢:٤٨ م]</span> <i class='fas fa-terminal text-purple-400 mr-2'></i> ✓ Token has nitro.\n→ Applying boosts...</span>"
     },
     {
       "userId": "2f625a9f-305e-4084-9cad-820fc16f8880",
       "serverId": "ac9d3a61-d1fe-4286-bd87-51ae749a84f9",
-      "timestamp": 1759227898318,
-      "content": "<span class='console-log-info'><span class='text-gray-400'>[١:٢٤:٥٨ م]</span> <i class='fas fa-terminal text-slate-400 mr-1'></i> ⚠ Boost already used 1/2 from ...A.G97M2i.g3nSEOo9_ab7RUDT2nm4uL3d_zJkFlGRRNHnJU</span>"
+      "timestamp": 1759248768946,
+      "content": "<span class='console-log-info'><span class='text-gray-400'>[٧:١٢:٤٨ م]</span> <i class='fas fa-terminal text-purple-400 mr-2'></i> → Applying 2 boost(s) from 2 available...</span>"
     },
     {
       "userId": "2f625a9f-305e-4084-9cad-820fc16f8880",
       "serverId": "ac9d3a61-d1fe-4286-bd87-51ae749a84f9",
-      "timestamp": 1759227901585,
-      "content": "<span class='console-log-info'><span class='text-gray-400'>[١:٢٥:٠١ م]</span> <i class='fas fa-terminal text-slate-400 mr-1'></i> ⚠ Boost already used 2/2 from ...A.G97M2i.g3nSEOo9_ab7RUDT2nm4uL3d_zJkFlGRRNHnJU</span>"
+      "timestamp": 1759248769211,
+      "content": "<span class='console-log-info'><span class='text-gray-400'>[٧:١٢:٤٩ م]</span> <i class='fas fa-terminal text-purple-400 mr-2'></i> ⚠ Boost already used 1/2 from ...A.G97M2i.g3nSEOo9_ab7RUDT2nm4uL3d_zJkFlGRRNHnJU</span>"
     },
     {
       "userId": "2f625a9f-305e-4084-9cad-820fc16f8880",
       "serverId": "ac9d3a61-d1fe-4286-bd87-51ae749a84f9",
-      "timestamp": 1759227901588,
-      "content": "<span class='console-log-success'><span class='text-gray-400'>[١:٢٥:٠١ م]</span> <i class='fas fa-check-circle text-green-500 mr-1'></i> ✓ Token boost process completed! (0/2 successful)\n\nProcess Complete\n✓ All tokens processed successfully!\n\n--- Boost Statistics ---\nℹ Total boosts attempted: 2\n✓ Successful boosts: 0\n⚠ Already used boosts: 2\nℹ Success rate: 0.0%</span>"
+      "timestamp": 1759248772488,
+      "content": "<span class='console-log-info'><span class='text-gray-400'>[٧:١٢:٥٢ م]</span> <i class='fas fa-terminal text-purple-400 mr-2'></i> ⚠ Boost already used 2/2 from ...A.G97M2i.g3nSEOo9_ab7RUDT2nm4uL3d_zJkFlGRRNHnJU</span>"
+    },
+    {
+      "userId": "2f625a9f-305e-4084-9cad-820fc16f8880",
+      "serverId": "ac9d3a61-d1fe-4286-bd87-51ae749a84f9",
+      "timestamp": 1759248772491,
+      "content": "<span class='console-log-success'><span class='text-gray-400'>[٧:١٢:٥٢ م]</span> <i class='fas fa-circle-check text-purple-400 mr-2'></i> ✓ Token boost process completed! (0/2 successful)\n\nProcess Complete\n✓ All tokens processed successfully!\n\n--- Boost Statistics ---\nℹ Total boosts attempted: 2\n✓ Successful boosts: 0\n⚠ Already used boosts: 2\nℹ Success rate: 0.0%</span>"
     }
   ],
   "appProcessState": [
