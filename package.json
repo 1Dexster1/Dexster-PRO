@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "description": "Dashboard Host without VPS",
-  "main": "index.js",
+  "main": "run.sh",
   "scripts": {
-    "start": "node index.js",
+    "start": "node run.sh",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
