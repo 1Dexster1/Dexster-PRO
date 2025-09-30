@@ -1,0 +1,38 @@
+{
+  "name": "dashboard-host-without-vps-by-ebrahim-web",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Dashboard Host without VPS",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@iconify/iconify": "^3.1.1",
+    "archiver": "^6.0.2",
+    "chalk": "^5.4.1",
+    "chardet": "^2.1.0",
+    "child_process": "^1.0.2",
+    "codemirror": "^6.0.1",
+    "daisyui": "^4.12.10",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "formidable": "^3.5.4",
+    "framer-motion": "^11.3.30",
+    "fs-extra": "^11.3.0",
+    "highlight.js": "^11.11.1",
+    "iconify": "^1.4.0",
+    "better-sqlite3": "^9.4.1",
+    "connect-sqlite3": "^0.9.0",
+    "sqlite3": "^5.1.7",
+    "path": "^0.12.7",
+    "tar": "^7.4.3",
+    "unzipper": "^0.12.3",
+    "uuid": "^11.1.0",
+    "ws": "^8.18.2"
+  }
+}
